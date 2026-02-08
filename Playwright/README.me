@@ -1,9 +1,30 @@
-# Demoes trying out various automation frameworks
-## Appium
-## Cucumber
-https://cucumber.io/
-## Cypress
-## Playwright
-https://playwright.dev/
-## Robot framework
-## TestCafe
+# Playwright
+
+## How to RUN
+npx playwright test
+
+Options
+See the browser window: add --headed.
+Run a single project/browser: --project=chromium.
+Run one file: npx playwright test tests/example.spec.ts.
+Open testing UI: --ui.
+
+## Show Report
+npx playwright show-report
+
+Serves it
+
+## UI 
+npx playwright test --ui
+
+## Codegen
+npx playwright codegen WEBSITE
+
+Easy to setup test using actual actions
+
+
+## Notes
+* Easy to setup
+* UI has a locator
+* Codegen
+* Calls have built it waits for loads
