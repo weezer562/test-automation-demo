@@ -35,9 +35,24 @@ build/
 out/
 
 # Test artifacts
+# Test artifacts
 playwright-report/
+blob-report/
 test-results/
+
+# Playwright auth/cache
+/playwright/.auth/
+/playwright/.cache/
 
 # Caches
 .cache/
 .cache-loader/
+*.tgz
+*.tmp
+*.temp
+
+# Optional binaries
+*.exe
+*.dll
+*.so
+*.dylib
