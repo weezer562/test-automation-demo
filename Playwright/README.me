@@ -9,7 +9,7 @@ Run a single project/browser: --project=chromium.
 Run one file: npx playwright test tests/example.spec.ts.
 Open testing UI: --ui.
 
-## Show Report
+## Report
 npx playwright show-report
 
 Serves it
@@ -22,6 +22,13 @@ npx playwright codegen WEBSITE
 
 Easy to setup test using actual actions
 
+# Debugging with Inspector
+npx playwright test --debug
+
+# Running with trace 
+Same info in UI mainly for CI 
+
+npx playwright test --trace on
 
 ## Notes
 * Easy to setup
