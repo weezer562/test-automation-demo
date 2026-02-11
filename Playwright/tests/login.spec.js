@@ -11,7 +11,9 @@ test.describe('Login Validation', () => {
     await expect(page).toHaveTitle("QA Practice | Learn with RV");
   });
 
-  test('Handle Invalid Login', async ({ page }) => {
+  test('Handle Invalid Login', {
+    tag: ['@smoke'],
+  }, async ({ page }) => {
     //Invalid Login
     await page.getByRole('textbox', { name: 'Email' }).click();
     await page.getByRole('textbox', { name: 'Email' }).fill('bademail');
@@ -28,7 +30,10 @@ test.describe('Login Validation', () => {
 
   });
 
-  test('Handle Valid Login', async ({ page }) => {
+  test('Handle Valid Login', {
+    tag: ['@smoke'],
+  },
+    async ({ page }) => {
     //Valid Login
     await page.getByRole('textbox', { name: 'Email' }).click();
     await page.getByRole('textbox', { name: 'Email' }).fill('admin@admin.com');

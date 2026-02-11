@@ -1,13 +1,17 @@
-# Playwright
+# Playwright - Demo
 
-## How to RUN
+## How to Run
+```
 npx playwright test
+````
 
-Options
+### Options
+
 See the browser window: add --headed.
 Run a single project/browser: --project=chromium.
 Run one file: npx playwright test tests/example.spec.ts.
 Open testing UI: --ui.
+
 
 ## Report
 npx playwright show-report
@@ -35,3 +39,4 @@ npx playwright test --trace on
 * UI has a locator
 * Codegen
 * Calls have built it waits for loads
+* Can use Tags for smoke, or designating what each test does
