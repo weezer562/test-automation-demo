@@ -7,32 +7,49 @@ npx playwright test
 
 ### Options
 
-See the browser window: add --headed.
-Run a single project/browser: --project=chromium.
-Run one file: npx playwright test tests/example.spec.ts.
-Open testing UI: --ui.
-
+See the browser window: add 
+```
+--headed
+```
+Run a single project/browser: 
+```
+--project=chromium
+```
+Run one file: 
+```
+npx playwright test tests/example.spec.ts
+```
+Open testing UI: 
+```
+--ui
+```
 
 ## Report
+```
 npx playwright show-report
-
-Serves it
-
+```
 ## UI 
+```
 npx playwright test --ui
+```
 
 ## Codegen
+```
 npx playwright codegen WEBSITE
+```
 
 Easy to setup test using actual actions
 
 # Debugging with Inspector
+```
 npx playwright test --debug
+```
 
-# Running with trace 
+# Running with trace
 Same info in UI mainly for CI 
-
+```
 npx playwright test --trace on
+```
 
 ## Notes
 * Easy to setup

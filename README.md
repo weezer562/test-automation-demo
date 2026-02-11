@@ -1,4 +1,4 @@
-# Demoes trying out various automation frameworks
+# Demoes for various automation frameworks
 ## Appium
 ## Cucumber
 https://cucumber.io/
