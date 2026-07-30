@@ -19,6 +19,14 @@ Run one file:
 ```
 npx playwright test tests/example.spec.ts
 ```
+Run specific Tags:
+```
+npx playwright --grep @current
+```
+```
+npx playwright --grep "@current|@smoke"
+```
+
 Open testing UI: 
 ```
 --ui
