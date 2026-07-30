@@ -56,3 +56,18 @@ test-results/
 *.dll
 *.so
 *.dylib
+
+# Test Files ignoring until in progress
+btnactions/
+buttons/
+tables/
+tabs/
+alerts.spec.js
+datepicker.spec.js
+dropdowns.spec.js
+fileupload.spec.js
+iframes.spec.js
+loader.spec.js
+pagination.spec.js
+shoppingcart.spec.js
+Playwright/tests/forms/recoverpassword.spec.js
