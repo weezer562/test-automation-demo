@@ -22,9 +22,12 @@ export class LoginPage {
     this.loginButton = page.getByRole('button', { name: 'Submit' });
     this.alertMessage = page.getByRole('alert');
 
-    // Locators for Shopping Cart Page after successful login
+    // Locators for after successful login retail URL
+    // Shopping Cart
     this.shoppingCartHeading = page.getByRole('heading', { name: 'SHOPPING CART' });
     this.proceedToCheckoutButton = page.getByRole('button', { name: 'PROCEED TO CHECKOUT' });
+
+    // Logout
     this.logoutText = page.getByRole('link', { name: 'Log Out' });
   }
 
