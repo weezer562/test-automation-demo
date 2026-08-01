@@ -11,9 +11,7 @@ test.describe('Login Validation', () => {
   });
 
   test('Has Correct Page Title', async ({ page }) => {
-    // Expect a title "to contain" a substring.
     await expect(page).toHaveTitle("QA Practice | Learn with RV");
-
   });
 
   test('Handle Invalid Login', {
@@ -28,25 +26,29 @@ test.describe('Login Validation', () => {
     await expect(loginPage.alertMessage).toHaveClass(/alert alert-danger/);
     await expect(loginPage.alertMessage).toHaveCSS('color', 'rgb(114, 28, 36)');
     await expect(loginPage.alertMessage).toHaveAttribute('id', 'message');
-
   });
 
   test('Handle Valid Login', {
     tag: ['@smoke'],
   },
     async ({ page }) => {
-    //Valid Login
     await loginPage.login('admin@admin.com', 'admin123');
 
     // Assertions for new page after successfully login
     await expect(loginPage.shoppingCartHeading).toBeVisible();
     await expect(loginPage.shoppingCartHeading).toHaveText('SHOPPING CART');
+  });
 
-    // Assertions for the "PROCEED TO CHECKOUT" button after succesfully login
+  test('Shopping Cart Proceed to Checkout Button is enabled', {
+    tag: ['@smoke'],
+  },
+    async ({ page }) => {
+    await loginPage.login('admin@admin.com', 'admin123');
+
+    // Assertions for Proceed to Checkout button
     await expect(loginPage.proceedToCheckoutButton).toBeVisible();
     await expect(loginPage.proceedToCheckoutButton).toHaveText('PROCEED TO CHECKOUT');
     await expect(loginPage.proceedToCheckoutButton).toBeEnabled();
-
   });
 
   test('Handle Logout', {

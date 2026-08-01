@@ -30,6 +30,7 @@ export class RegisterPage {
   readonly termsAndCondtionsLabel: Locator;
 
   readonly registerButton: Locator;
+  readonly registerSuccessMessage: Locator;
   readonly alertMessage: Locator;
 
   constructor(page: Page) {
@@ -62,7 +63,8 @@ export class RegisterPage {
     this.termsAndCondtionsCheckbox = page.locator('input[id="exampleCheck1"]');
     this.termsAndCondtionsLabel = page.locator('label[class="form-check-label"]');
 
-    this.registerButton = page.getByRole('button', { name: 'Submit' });
+    this.registerButton = page.locator('button[type="submit"]');
+    this.registerSuccessMessage = page.locator('#message');
     this.alertMessage = page.getByRole('alert');
   }
 

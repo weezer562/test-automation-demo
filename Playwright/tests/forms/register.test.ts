@@ -70,43 +70,34 @@ test.describe('Register User', () => {
     await expect(registerPage.registerButton).toHaveAttribute('onclick', 'registerAccount()');
   });
 
-  test('Unable to register with invalid email', { tag: ['@smoke']}, async ({ page }) => {
-    await registerPage.firstNameInput.fill('kobe');
-    await registerPage.lastNameInput.fill('bryant');
-    await registerPage.phoneInput.fill('1234567890');
-    await registerPage.countryDropdown.selectOption({ label: 'United States of America' });
-    await registerPage.emailInput.fill('invalidemail');
-    await registerPage.passwordInput.fill('Password123!');
-    await registerPage.termsAndCondtionsCheckbox.check();
-    await registerPage.registerButton.click();
+  test('Unable to register with invalid email', { tag: ['@smoke', '@current']}, async ({ page }) => {
+    // Register with invalid email
+    await registerPage.register('John', 'Doe', '1234567890', 'United States of America', 'invalidemail', 'Password123!', true);
 
     //Assertions
-    await registerPage.emailValidationMessage.waitFor({ state: 'visible' });
+    expect(registerPage.registerSuccessMessage).toBeHidden();
 
-    const validationMessage = await registerPage.emailValidationMessage.evaluate((input) => input.getAttribute('validationMessage'));
+    // Browser validation message for invalid email
+    const validationMessage = await registerPage.emailInput.evaluate((element: HTMLInputElement) => element.validationMessage);
     console.log('Validation message:', validationMessage);
-    expect(validationMessage).toContain("Please include an '@' in the email address. 'x' is missing an '@'.");
+    expect(validationMessage).toContain("Please include an '@' in the email address. 'invalidemail' is missing an '@'.");
   });
 
   test('Unable to register with empty email field', { tag: ['@smoke']}, async ({ page }) => {
     await registerPage.registerButton.click();
 
     // Assertions for error message
-    const isEmailEmpty = await registerPage.emailInput.evaluate((input) => input.getAttribute('value') === '');
-    expect(isEmailEmpty).toBe(true);
-    });
+    const validationMessage = await registerPage.emailInput.evaluate((element: HTMLInputElement) => element.validationMessage);
+    console.log('Validation message:', validationMessage);
+    expect(validationMessage).toContain("Please fill out this field.");
+  });
 
   test('Unable to register without agreeing to terms and conditions', { tag: ['@smoke']}, async ({ page }) => {
-    await registerPage.firstNameInput.fill('John');
-    await registerPage.lastNameInput.fill('Doe');
-    await registerPage.phoneInput.fill('1234567890');
-    await registerPage.countryDropdown.selectOption({ label: 'United States of America' });
-    await registerPage.emailInput.fill('john.doe@example.com');
-    await registerPage.passwordInput.fill('Password123!');
-    await registerPage.registerButton.click();
+    // Register with invalid email
+    await registerPage.register('John', 'Doe', '1234567890', 'United States of America', 'john.doe@example.com', 'Password123!', false);
 
-    // Assertions for error message
-    expect(await registerPage.termsAndCondtionsCheckbox.isChecked()).toBe(true);
+    //Assertions
+    expect(registerPage.registerSuccessMessage).toBeHidden();
   });
 });
 
