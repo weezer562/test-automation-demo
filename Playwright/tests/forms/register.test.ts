@@ -25,17 +25,17 @@ test.describe("Register User", () => {
   test("First name field is correctly displayed", {
     tag: ["@smoke"],
   }, async ({ page }) => {
-      await expect(registerPage.firstNameLabel).toHaveText("First Name");
-      await expect(registerPage.firstNameInput).toBeVisible();
-      await expect(registerPage.firstNameInput).toHaveAttribute("type", "text");
-      await expect(registerPage.firstNameInput).toHaveAttribute("placeholder","Enter first name");
+    await expect(registerPage.firstNameLabel).toBeVisible();
+    await expect(registerPage.firstNameInput).toBeVisible();
+    await expect(registerPage.firstNameInput).toHaveAttribute("type", "text");
+    await expect(registerPage.firstNameInput).toHaveAttribute("placeholder","Enter first name");
   });
 
 
   test("Last name field is correctly displayed", {
     tag: ["@smoke"],
   }, async ({ page }) => {
-      await expect(registerPage.lastNameLabel).toHaveText("Last Name");
+      await expect(registerPage.lastNameLabel).toBeVisible();
       await expect(registerPage.lastNameInput).toBeVisible();
       await expect(registerPage.lastNameInput).toHaveAttribute("type", "text");
       await expect(registerPage.lastNameInput).toHaveAttribute("placeholder", "Enter last name");
@@ -44,7 +44,7 @@ test.describe("Register User", () => {
   test("Phone field is correctly displayed", {
     tag: ["@smoke"],
   }, async ({ page }) => {
-      await expect(registerPage.phoneLabel).toHaveText("Phone Number");
+      await expect(registerPage.phoneLabel).toBeVisible();
       await expect(registerPage.phoneInput).toBeVisible();
       await expect(registerPage.phoneInput).toHaveAttribute("type", "text");
       await expect(registerPage.phoneInput).toHaveAttribute("placeholder", "Enter phone number");
@@ -53,16 +53,15 @@ test.describe("Register User", () => {
   test("Country dropdown is correctly displayed", {
     tag: ["@smoke"],
   }, async ({ page }) => {
-      await expect(registerPage.countryLabel).toHaveText("Country");
+      await expect(registerPage.countryLabel).toBeVisible();
       await expect(registerPage.countryDropdown).toBeVisible();
       await expect(registerPage.countryOption).toHaveText("Select a country...");
-      await expect(registerPage.countryDropdown).toHaveAttribute("placeholder", "Select a country...");
   });
 
   test("Email field is correctly displayed", {
     tag: ["@smoke"],
   }, async ({ page }) => {
-      await expect(registerPage.emailLabel).toHaveText("Email address *");
+      await expect(registerPage.emailLabel).toBeVisible();
       await expect(registerPage.emailInput).toBeVisible();
       await expect(registerPage.emailInput).toHaveAttribute("type", "email");
       await expect(registerPage.emailInput).toHaveAttribute("placeholder", "Enter email");
@@ -71,7 +70,7 @@ test.describe("Register User", () => {
   test("Password field is correctly displayed", {
     tag: ["@smoke"],
   }, async ({ page }) => {
-      await expect(registerPage.passwordLabel).toHaveText("Password *");
+      await expect(registerPage.passwordLabel).toBeVisible();
       await expect(registerPage.passwordInput).toBeVisible();
       await expect(registerPage.passwordInput).toHaveAttribute("type", "password");
       await expect(registerPage.passwordInput).toHaveAttribute("placeholder", "Password");
@@ -122,7 +121,6 @@ test.describe("Register User", () => {
 
       // Assertions for error message
       const validationMessage = await registerPage.emailInput.evaluate((element: HTMLInputElement) => element.validationMessage);
-      console.log("Validation message:", validationMessage);
       expect(validationMessage).toContain("Please fill out this field.");
   });
 

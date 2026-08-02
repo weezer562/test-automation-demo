@@ -37,30 +37,30 @@ export class RegisterPage {
     this.page = page;
 
     // Locators for inital Register Page
-    this.form = page.locator('form[name="registerForm"]');
-    this.formHeader = page.locator('h2');
+    this.form = page.locator('form#registerForm');
+    this.formHeader = page.getByRole('heading', { level: 2 });
 
-    this.firstNameLabel = page.locator('label[for="firstName"]');
-    this.firstNameInput = page.locator('input[id="firstName"]');
+    this.firstNameLabel = page.getByLabel('First Name');
+    this.firstNameInput = page.getByRole('textbox', { name: 'First Name' });
 
-    this.lastNameLabel = page.locator('label[for="lastName"]');
-    this.lastNameInput = page.locator('input[id="lastName"]');
+    this.lastNameLabel = page.getByLabel('Last Name');
+    this.lastNameInput = page.getByRole('textbox', { name: 'Last Name' });
 
-    this.phoneLabel = page.locator('label[for="phone"]');
-    this.phoneInput = page.locator('input[id="phone"]');
+    this.phoneLabel = page.getByLabel('Phone number');
+    this.phoneInput = page.getByPlaceholder('Enter phone number', { exact: true });
 
-    this.countryLabel = page.locator('label[for="countries_dropdown_menu"]');
-    this.countryDropdown = page.locator('select[id="countries_dropdown_menu"]');
-    this.countryOption = page.locator('option[selected]');
+    this.countryLabel = page.getByLabel('Country');
+    this.countryDropdown = page.locator('select#countries_dropdown_menu');
+    this.countryOption = page.getByRole('option', { selected: true });
 
     this.emailLabel = page.locator('label[for="exampleInputEmail1"]');
     this.emailInput = page.locator('input[id="emailAddress"]');
-    this.emailValidationMessage = page.locator('input#email[required]:invalid');
+    this.emailValidationMessage = page.locator('input#emailAddress[required]:invalid');
 
     this.passwordLabel = page.locator('label[for="exampleInputPassword1"]');
     this.passwordInput = page.locator('input[name="password"]');
 
-    this.termsAndCondtionsCheckbox = page.locator('input[id="exampleCheck1"]');
+    this.termsAndCondtionsCheckbox = page.getByRole('checkbox', { name: 'I agree with the terms and conditions' });
     this.termsAndCondtionsLabel = page.locator('label[class="form-check-label"]');
 
     this.registerButton = page.locator('button[type="submit"]');
