@@ -3,48 +3,162 @@ on:
   issue_comment:
     types: [created]
 
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
 jobs:
   playwright:
     name: Run Playwright Tests
-    # Only run if the comment is on a Pull Request and contains the trigger phrase
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '/run-tests')
+    if: >-
+      github.event.issue.pull_request &&
+      (contains(github.event.comment.body, '/run-test') || contains(github.event.comment.body, '/run-tests'))
     runs-on: ubuntu-latest
-    
+    defaults:
+      run:
+        working-directory: Playwright
+
     steps:
-      # Step 1: Get the actual branch name and SHA of the PR
       - name: Get PR Branch Reference
         id: pr_branch
         uses: xt0rted/pull-request-comment-branch@v3
 
-      # Step 2: Checkout the code using the retrieved PR branch reference
       - name: Checkout PR Branch Code
         uses: actions/checkout@v4
         with:
-          ref: ${{ steps.pr_branch.outputs.head_ref }}
+          ref: ${{ steps.pr_branch.outputs.head_sha }}
 
-      # Step 3: Initialize Node.js environment
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
 
-      # Step 4: Install your project dependencies
       - name: Install dependencies
         run: npm ci
 
-      # Step 5: Install Playwright browsers along with OS-level dependencies
       - name: Install Playwright Browsers
         run: npx playwright install --with-deps
 
-      # Step 6: Run your Playwright end-to-end tests
       - name: Run Playwright tests
-        run: npx playwright test
+        id: run_tests
+        continue-on-error: true
+        run: |
+          npx playwright test --project=chromium
+          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
 
-      # Step 7: Upload test execution reports if any tests fail
-      - name: Upload Test Report
+      - name: Upload Playwright artifacts
         uses: actions/upload-artifact@v4
-        if: ${{ ! cancelled() }}
+        if: ${{ always() && !cancelled() }}
         with:
           name: playwright-report
-          path: playwright-report/
+          path: |
+            Playwright/playwright-report/
+            Playwright/test-results/results.json
           retention-days: 30
+
+      - name: Build PR report comment
+        id: pr_comment
+        if: ${{ always() && !cancelled() }}
+        uses: actions/github-script@v7
+        env:
+          TEST_EXIT_CODE: ${{ steps.run_tests.outputs.exit_code }}
+          OWNER: ${{ github.repository_owner }}
+          REPO: ${{ github.event.repository.name }}
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            const reportPath = path.join(process.env.GITHUB_WORKSPACE, 'Playwright', 'test-results', 'results.json');
+            const exitCode = process.env.TEST_EXIT_CODE || '1';
+            const pagesUrl = `https://${process.env.OWNER}.github.io/${process.env.REPO}/`;
+
+            const failures = [];
+
+            function walkSuite(suite, parents = []) {
+              const suiteTitle = suite.title ? [...parents, suite.title] : parents;
+
+              for (const spec of suite.specs || []) {
+                for (const test of spec.tests || []) {
+                  if (test.status === 'failed') {
+                    const firstResult = (test.results || []).find(r => r.status === 'failed') || (test.results || [])[0] || {};
+                    const message = (firstResult.error && firstResult.error.message) ? String(firstResult.error.message).split('\n')[0] : 'No error message captured';
+                    failures.push({
+                      title: [...suiteTitle, spec.title].filter(Boolean).join(' > '),
+                      project: test.projectName || 'unknown',
+                      message,
+                    });
+                  }
+                }
+              }
+
+              for (const child of suite.suites || []) {
+                walkSuite(child, suiteTitle);
+              }
+            }
+
+            let body;
+            if (!fs.existsSync(reportPath)) {
+              body = [
+                '### Playwright run from `/run-test`',
+                '',
+                'Could not find `test-results/results.json`, so failure details were not parsed.',
+                '',
+                `- Report: ${pagesUrl}`,
+                `- Exit code: ${exitCode}`,
+              ].join('\n');
+            } else {
+              const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+              for (const suite of report.suites || []) {
+                walkSuite(suite, []);
+              }
+
+              if (failures.length === 0) {
+                body = [
+                  '### Playwright run from `/run-test`',
+                  '',
+                  'All tests passed.',
+                  '',
+                  `- Report: ${pagesUrl}`,
+                ].join('\n');
+              } else {
+                const maxItems = 20;
+                const shown = failures.slice(0, maxItems).map((f, i) => `${i + 1}. [${f.project}] ${f.title}\\n   - ${f.message}`);
+                const more = failures.length > maxItems ? `\\n...and ${failures.length - maxItems} more failure(s).` : '';
+                body = [
+                  '### Playwright run from `/run-test`',
+                  '',
+                  `Failed tests: **${failures.length}**`,
+                  '',
+                  ...shown,
+                  more,
+                  '',
+                  `- Full HTML report: ${pagesUrl}`,
+                ].join('\n');
+              }
+            }
+
+            core.setOutput('body', body);
+
+      - name: Post sticky PR comment
+        if: ${{ always() && !cancelled() }}
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          number: ${{ github.event.issue.number }}
+          header: playwright-report
+          message: ${{ steps.pr_comment.outputs.body }}
+
+      - name: Deploy report to GitHub Pages
+        if: ${{ always() && !cancelled() }}
+        continue-on-error: true
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./Playwright/playwright-report
+
+      - name: Fail job if tests failed
+        if: ${{ steps.run_tests.outputs.exit_code != '0' }}
+        run: |
+          echo "Playwright tests failed with exit code ${{ steps.run_tests.outputs.exit_code }}"
+          exit 1
