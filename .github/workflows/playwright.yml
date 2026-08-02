@@ -44,7 +44,8 @@ jobs:
         id: run_tests
         continue-on-error: true
         run: |
-          npx playwright test --project=chromium
+          mkdir -p test-results
+          npx playwright test --project=chromium 2>&1 | tee test-results/test-output.log
           echo "exit_code=$?" >> "$GITHUB_OUTPUT"
 
       - name: Upload Playwright artifacts
@@ -55,12 +56,13 @@ jobs:
           path: |
             Playwright/playwright-report/
             Playwright/test-results/results.json
+            Playwright/test-results/test-output.log
           retention-days: 30
 
       - name: Build PR report comment
         id: pr_comment
         if: ${{ always() && !cancelled() }}
-        uses: actions/github-script@v7
+        uses: actions/github-script@v6
         env:
           TEST_EXIT_CODE: ${{ steps.run_tests.outputs.exit_code }}
           OWNER: ${{ github.repository_owner }}
@@ -71,6 +73,7 @@ jobs:
             const path = require('path');
 
             const reportPath = path.join(process.env.GITHUB_WORKSPACE, 'Playwright', 'test-results', 'results.json');
+            const logPath = path.join(process.env.GITHUB_WORKSPACE, 'Playwright', 'test-results', 'test-output.log');
             const exitCode = process.env.TEST_EXIT_CODE || '1';
             const pagesUrl = `https://${process.env.OWNER}.github.io/${process.env.REPO}/`;
 
@@ -100,10 +103,19 @@ jobs:
 
             let body;
             if (!fs.existsSync(reportPath)) {
+              let fallback = [];
+              if (fs.existsSync(logPath)) {
+                const lines = fs.readFileSync(logPath, 'utf8').split('\n');
+                const errorLines = lines.filter(l => /^\s*Error:|\bfailed\b/i.test(l)).slice(0, 20);
+                fallback = errorLines.map((l, i) => `${i + 1}. ${l.trim()}`);
+              }
+
               body = [
                 '### Playwright run from `/run-test`',
                 '',
                 'Could not find `test-results/results.json`, so failure details were not parsed.',
+                fallback.length ? '' : 'No fallback failure lines found in test log.',
+                ...fallback,
                 '',
                 `- Report: ${pagesUrl}`,
                 `- Exit code: ${exitCode}`,

@@ -1,6 +1,7 @@
 // @ts-check
 /// <reference types="node" />
-import { defineConfig, devices } from '@playwright/test';
+const path = require('path');
+const { defineConfig, devices } = require('@playwright/test');
 
 /**
  * Read environment variables from file.
@@ -13,7 +14,7 @@ import { defineConfig, devices } from '@playwright/test';
 /**
  * @see https://playwright.dev/docs/test-configuration
  */
-export default defineConfig({
+module.exports = defineConfig({
   testDir: './tests',
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -28,7 +29,7 @@ export default defineConfig({
     ? [
         ['github'],
         ['html', { open: 'never' }],
-        ['json', { outputFile: 'test-results/results.json' }],
+        ['json', { outputFile: path.join(__dirname, 'test-results', 'results.json') }],
       ]
     : 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
