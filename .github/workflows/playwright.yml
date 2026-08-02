@@ -1,70 +1,50 @@
-name: Playwright Tests
+name: Playwright Tests on Comment
 on:
-  push:
-    branches: [ main ]
-  # pull_request:
-  #   branches: [ main ]
-  workflow_dispatch:
+  issue_comment:
+    types: [created]
+
 jobs:
-  test:
-    timeout-minutes: 60
+  playwright:
+    name: Run Playwright Tests
+    # Only run if the comment is on a Pull Request and contains the trigger phrase
+    if: github.event.issue.pull_request && contains(github.event.comment.body, '/run-tests')
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: Playwright
+    
     steps:
-    - uses: actions/checkout@v4
-    - uses: actions/setup-node@v4
-      with:
-        node-version: lts/*
-    - name: Install dependencies
-      run: npm ci
-    - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
-    - name: Run Playwright tests
-      id: playwright_tests
-      continue-on-error: true
-      run: |
-        npx playwright test --project=chromium
-        echo "exit_code=$?" >> "$GITHUB_OUTPUT"
-    # - uses: actions/upload-artifact@v4
-    #   # if: ${{ !cancelled() }}
-      # with:
-      #   name: test_results
-      #   path: Playwright/test-results/
-      #   retention-days: 30
+      # Step 1: Get the actual branch name and SHA of the PR
+      - name: Get PR Branch Reference
+        id: pr_branch
+        uses: xt0rted/pull-request-comment-branch@v3
 
-    - uses: actions/upload-artifact@v4
-      if: ${{ always() && !cancelled() }}
-      with:
-        name: playwright-report
-        path: Playwright/playwright-report/
-        retention-days: 30
+      # Step 2: Checkout the code using the retrieved PR branch reference
+      - name: Checkout PR Branch Code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.pr_branch.outputs.head_ref }}
 
-    - name: Fail job if tests failed
-      if: ${{ steps.playwright_tests.outputs.exit_code != '0' }}
-      run: |
-        echo "Playwright tests failed with exit code ${{ steps.playwright_tests.outputs.exit_code }}"
-        exit 1
+      # Step 3: Initialize Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
 
-  deploy:
-    name: Deploy to GitHub Pages
-    needs: test
-    if: ${{ always() && !cancelled() }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-    - name: Download Playwright report artifact
-      uses: actions/download-artifact@v4
-      with:
-        name: playwright-report
-        path: ./playwright-report
+      # Step 4: Install your project dependencies
+      - name: Install dependencies
+        run: npm ci
 
-    - name: Deploy to GitHub Pages
-      id: deployment
-      continue-on-error: true
-      uses: peaceiris/actions-gh-pages@v4
-      with:
-        github_token: ${{ secrets.GITHUB_TOKEN }}
-        publish_dir: ./playwright-report
+      # Step 5: Install Playwright browsers along with OS-level dependencies
+      - name: Install Playwright Browsers
+        run: npx playwright install --with-deps
+
+      # Step 6: Run your Playwright end-to-end tests
+      - name: Run Playwright tests
+        run: npx playwright test
+
+      # Step 7: Upload test execution reports if any tests fail
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4
+        if: ${{ ! cancelled() }}
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 30
