@@ -43,10 +43,14 @@ jobs:
       - name: Run Playwright tests
         id: run_tests
         continue-on-error: true
+        shell: bash
         run: |
           mkdir -p test-results
-          npx playwright test --project=chromium 2>&1 | tee test-results/test-output.log
-          echo "exit_code=$?" >> "$GITHUB_OUTPUT"
+          set +e
+          npx playwright test --project=chromium --reporter=github,html,json 2>&1 | tee test-results/test-output.log
+          test_exit_code=${PIPESTATUS[0]}
+          echo "exit_code=$test_exit_code" >> "$GITHUB_OUTPUT"
+          exit 0
 
       - name: Upload Playwright artifacts
         uses: actions/upload-artifact@v4
@@ -153,13 +157,42 @@ jobs:
 
             core.setOutput('body', body);
 
-      - name: Post sticky PR comment
+      - name: Create or update PR report comment
         if: ${{ always() && !cancelled() }}
-        uses: marocchino/sticky-pull-request-comment@v2
+        continue-on-error: true
+        uses: actions/github-script@v6
+        env:
+          COMMENT_BODY: ${{ steps.pr_comment.outputs.body }}
         with:
-          number: ${{ github.event.issue.number }}
-          header: playwright-report
-          message: ${{ steps.pr_comment.outputs.body }}
+          script: |
+            const marker = '<!-- playwright-report -->';
+            const issue_number = context.issue.number;
+            const body = `${marker}\n${process.env.COMMENT_BODY || 'Playwright run completed.'}`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              per_page: 100,
+            });
+
+            const existing = comments.find(c => c.user?.type === 'Bot' && c.body?.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                body,
+              });
+            }
 
       - name: Deploy report to GitHub Pages
         if: ${{ always() && !cancelled() }}
