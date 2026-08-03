@@ -11,10 +11,8 @@
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "@cucumber/cucumber": "^12.6.0",
-    "chromedriver": "^145.0.1"
-  },
-  "dependencies": {
-    "selenium-webdriver": "^4.40.0"
+    "@cucumber/cucumber": "^13.2.0",
+    "chai": "^6.2.2",
+    "selenium-webdriver": "^4.46.0"
   }
 }

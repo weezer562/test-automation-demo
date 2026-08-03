@@ -1,37 +1,30 @@
-Feature: Is it Friday yet?
-  Everybody wants to know when it's Friday
+Feature: Handle login functionality
+  Are we able to login with valid credentials and unable to login with invalid credentials
 
-#   Scenario: Sunday isn't Friday
-#     Given today is Sunday
-#     When I ask whether it's Friday yet
-#     Then I should be told "Nope"
-
-#  Scenario: Friday is Friday
-#     Given today is Friday
-#     When I ask whether it's Friday yet
-#     Then I should be told "TGIF"
-# Moving to variables below
-
-  # Scenario Outline: Today is or is not Friday
-  #   Given today is "<day>"
-  #   When I ask whether it's Friday yet
-  #   Then I should be told "<answer>"
-
-  # Examples:
-  #   | day            | answer |
-  #   | Friday         | TGIF   |
-  #   | Sunday         | Nope   |
-  #   | anything else! | Nope   |
-
-  Scenario: Page title is correct
-    Given I am on the landing page
+  Scenario: I am able to navigate to the login page
+    Given I am able to navigate to the login page
     Then The page title should be "QA Practice | Learn with RV"
 
-  # Scenario Outline: Invalid Login is Handled
-  # Given I am on the login page
-  # When I enter "<username>" and "<password>"
-  # Then I should see the error message "Bad credentials! Please try again! Make sure that you\'ve registered."
-  # And I should see the correct alert
-  # And The alert should have the correct class
-  # And The alert should have the color 'rgb(114, 28, 36)'
-  # And The alert should have the id 'message'
+  Scenario: User is unable to login with invalid credentials
+    Given I am able to navigate to the login page
+    When I attempt to login with invalid credentials
+    Then I should see the error message "Bad credentials! Please try again! Make sure that you've registered."
+    And the alert has the correct class
+    And the alert has the correct color 'rgba(114, 28, 36, 1)'
+    
+  Scenario: User is able to login with valid credentials
+    Given I am able to navigate to the login page
+    When I enter "admin@admin.com" and "admin123"
+    Then I should see the Shopping Cart page
+
+  Scenario: Shopping Cart proceed to Checkout button is enabled
+    Given I am able to navigate to the login page
+    Then should have text "PROCEED TO CHECKOUT" on the button
+    And should be enabled
+  
+  Scenario: User is able to logout successfully
+      Given I am able to navigate to the login page
+      When I click on the logout button
+      Then I should be redirected to the login page
+      And I should see the email input field
+      And I should see the password input field
